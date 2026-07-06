@@ -2,20 +2,16 @@
 name: jobdanmark-search
 version: 1.0.0
 description: >
-  Make sure to use this skill whenever the user mentions anything related to Danish
-  job listings, job search in Denmark, finding work in Denmark, or job vacancies on
-  Jobdanmark — even if they don't explicitly mention jobdanmark.dk. Also invoke this
-  skill for questions about specific Danish job categories, municipalities, job types,
-  or salaries in a job-search context. Trigger phrases include:
-  danish jobs, jobs in denmark, find job denmark, job search denmark, danish job listings,
-  jobdanmark, job opslag, find job, jobsøgning, ledige stillinger, stillingsopslag,
-  job i Danmark, fuldtidsjob, deltidsjob, studiejob, praktikplads, elev, fleksjob,
-  IT job denmark, sygeplejersker job, håndværker job, ingeniør job, pædagog job,
-  kontor job, leder job, salg job, hotel job, kirke job, job aarhus, job københavn,
-  job odense, job aalborg, job sjælland, job jylland, job fyn, jobkategorier denmark,
-  ledige job, ansøgningsfrist, søg job, job opslaget, jobopslag, danish vacancies,
-  work in denmark, employment denmark, job denmark, jobs near me denmark,
-  apprentice denmark, internship denmark, part-time denmark, full-time denmark.
+  Use this skill whenever the user mentions Danish job listings, job search in Denmark,
+  finding work in Denmark, or job vacancies on Jobdanmark — even if they don't say
+  jobdanmark.dk explicitly. Also invoke for specific Danish job categories, municipalities,
+  job types, or salaries in a job-search context. Trigger phrases: danish jobs, jobs in
+  denmark, find job denmark, job search denmark, jobdanmark, job opslag, find job,
+  jobsøgning, ledige stillinger, stillingsopslag, job i Danmark, fuldtidsjob, deltidsjob,
+  studiejob, praktikplads, elev, fleksjob, IT job denmark, ingeniør job, pædagog job, kontor
+  job, leder job, salg job, job aarhus, job københavn, job odense, job aalborg, ledige job,
+  ansøgningsfrist, søg job, work in denmark, employment denmark, internship denmark, part-
+  time denmark, full-time denmark.
 context: fork
 allowed-tools: Bash(bun run skills/jobdanmark-search/cli/src/cli.ts *)
 ---

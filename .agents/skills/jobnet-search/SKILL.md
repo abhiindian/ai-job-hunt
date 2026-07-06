@@ -2,21 +2,16 @@
 name: jobnet-search
 version: 1.0.0
 description: >
-  Make sure to use this skill whenever the user mentions anything related to Danish
-  job searching, job listings, job vacancies, employment opportunities in Denmark, or
-  the Danish government job portal — even if they don't mention jobnet.dk explicitly.
-  Also invoke this skill for questions about specific job titles, occupations, employers,
-  or regions in a Danish employment context. This skill covers the official Danish
-  public job portal operated by STAR (Styrelsen for Arbejdsmarked og Rekruttering).
-  Trigger phrases include: danish jobs, danish job search, jobnet, jobnet.dk, find job
-  denmark, danish employment, job i danmark, job på jobnet, offentlige job, stillinger
-  i det offentlige, public sector jobs denmark, government jobs denmark, STAR jobs,
-  job ledige stillinger, ledig stilling, søg job, job opslag, job vacancy denmark,
-  stillingopslag, jobopslag, sygepleje job, ingeniør job, lærer job, pædagog job,
-  it-job denmark, jobs in copenhagen, jobs in aarhus, jobs in odense, deltidsjob,
-  fuldtidsjob, fastansættelse, tidsbegrænset ansættelse, fleksjob, sygeplejerske job,
-  social worker job denmark, occupation search denmark, esco occupation, job deadline,
-  ansøgningsfrist, søg efter job, full time job denmark, part time job denmark.
+  Use this skill whenever the user mentions Danish job searching, job listings, job
+  vacancies, employment opportunities in Denmark, or the Danish government job portal — even
+  if they don't say jobnet.dk explicitly. This skill covers the official public job portal
+  operated by STAR (Styrelsen for Arbejdsmarked og Rekruttering). Trigger phrases: danish
+  jobs, jobnet, jobnet.dk, find job denmark, job i danmark, offentlige job, stillinger i det
+  offentlige, public sector jobs denmark, government jobs denmark, STAR jobs, ledige
+  stillinger, ledig stilling, søg job, job opslag, stillingopslag, sygepleje job, ingeniør
+  job, lærer job, pædagog job, it-job denmark, jobs in copenhagen, jobs in aarhus,
+  deltidsjob, fuldtidsjob, fleksjob, ansøgningsfrist, full time job denmark, part time job
+  denmark.
 context: fork
 allowed-tools: Bash(bun run skills/jobnet-search/cli/src/cli.ts *)
 ---
