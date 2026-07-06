@@ -109,7 +109,7 @@ This runs the full workflow: evaluate fit, draft CV + cover letter, review with 
 
 ```
 ai-job-search/
-├── CLAUDE.md                          # Main candidate profile + workflow rules
+├── copilot.md                         # Main candidate profile + workflow rules
 ├── .claude/
 │   ├── commands/
 │   │   ├── apply.md                   # /apply workflow (drafter-reviewer)
@@ -190,7 +190,7 @@ If you prefer editing files directly instead of using `/setup`:
 
 | File | What to change |
 |------|---------------|
-| `CLAUDE.md` | Your full profile (name, education, experience, skills, goals) |
+| `copilot.md` | Your full profile (name, education, experience, skills, goals) |
 | `01-candidate-profile.md` | Structured version of your CV data |
 | `02-behavioral-profile.md` | Your behavioral assessment or self-assessment |
 | `04-job-evaluation.md` | Skill match areas, career goals, motivation filters |

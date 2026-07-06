@@ -87,7 +87,7 @@ All three paths produce the same result: fully populated profile files.
 
 | File | Content |
 |------|---------|
-| `CLAUDE.md` | Your full candidate profile |
+| `copilot.md` | Your full candidate profile |
 | `01-candidate-profile.md` | Structured education, experience, skills |
 | `02-behavioral-profile.md` | Behavioral assessment |
 | `04-job-evaluation.md` | Personalized skill match areas and career goals |
