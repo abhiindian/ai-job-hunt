@@ -1,20 +1,23 @@
 <p align="center">
-  <img src="claude_animation.gif" alt="Claude Job Search Assistant" width="200">
+  <img src="claude_animation.gif" alt="AI Job Search Assistant" width="200">
 </p>
 
 # AI Job Search
 
-An AI-powered job application framework built on [Claude Code](https://claude.com/claude-code). Fork it, fill in your profile, and let Claude evaluate job postings, tailor your CV, write cover letters, and prepare you for interviews.
+An AI-powered job application framework built on [GitHub Copilot](https://github.com/features/copilot). Fork it, fill in your profile, and let Copilot evaluate job postings, tailor your CV, write cover letters, and prepare you for interviews.
+
+> [!NOTE]
+> This project is a fork and adaptation of the excellent **[MadsLorentzen/ai-job-search](https://github.com/MadsLorentzen/ai-job-search)** by [Mads Lorentzen](https://github.com/MadsLorentzen). The original was built for Claude Code; this fork ports the workflow to GitHub Copilot. Full credit for the original design, the drafter-reviewer application pipeline, and the Danish job-portal skills goes to Mads. Please ⭐ the [upstream repository](https://github.com/MadsLorentzen/ai-job-search) and consider supporting his work below.
 
 <p align="center">
   <a href="https://ko-fi.com/madslorentzen">
-    <img src="https://storage.ko-fi.com/cdn/kofi3.png?v=6" alt="Buy me a coffee at ko-fi.com" height="40">
+    <img src="https://storage.ko-fi.com/cdn/kofi3.png?v=6" alt="Buy Mads Lorentzen a coffee at ko-fi.com" height="40">
   </a>
 </p>
 
 ## What this is
 
-A structured workflow that turns Claude Code into a full-stack job application assistant. The core workflow (self-profiling, fit evaluation, and the drafter-reviewer application pipeline) is **language- and country-agnostic**. The job portal search skills are built for the Danish market (Jobindex, Jobnet, Akademikernes Jobbank, etc.), but the pattern is designed to be swapped for your local job boards.
+A structured workflow that turns GitHub Copilot into a full-stack job application assistant. The core workflow (self-profiling, fit evaluation, and the drafter-reviewer application pipeline) is **language- and country-agnostic**. The job portal search tools are built for the Danish market (Jobindex, Jobnet, Akademikernes Jobbank, etc.), but the pattern is designed to be swapped for your local job boards.
 
 ```
 /setup          /scrape              /apply <url>
@@ -32,13 +35,23 @@ files ready    with fit ratings     (LaTeX, tailored)
                -> /apply            -> Revise -> Final output
 ```
 
-The framework encodes career guidance best practices, including structured evaluation criteria, forward-looking cover letter framing, and optional salary benchmarking.
+The framework encodes career-guidance best practices, including structured evaluation criteria, forward-looking cover letter framing, and optional salary benchmarking.
+
+## How it works with GitHub Copilot
+
+This repo drives GitHub Copilot through two native mechanisms:
+
+- **Custom instructions** — [`copilot.md`](copilot.md) holds your candidate profile and the workflow rules Copilot follows. It acts as the persistent context for every chat in this workspace.
+- **Prompt files** — the `/setup`, `/apply`, `/scrape`, and related commands live in [`.github/prompts/`](.github/prompts/) as `*.prompt.md` files. In **Copilot Chat** (VS Code, Agent mode) you invoke them by typing `/` followed by the file name, e.g. `/setup`.
+
+You interact with everything from Copilot Chat inside VS Code (or the GitHub Copilot CLI). There is nothing to deploy — the "app" is the set of prompt files plus your profile.
 
 ## Prerequisites
 
-- [Claude Code](https://claude.com/claude-code) (CLI)
+- [Visual Studio Code](https://code.visualstudio.com/) with the [GitHub Copilot](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot) and [GitHub Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) extensions
+- An active [GitHub Copilot subscription](https://github.com/features/copilot) with **Agent mode** enabled
 - Python 3.10+
-- [Bun](https://bun.sh) (for Danish job search CLI tools)
+- [Bun](https://bun.sh) (for the Danish job-search CLI tools)
 - LaTeX distribution with `lualatex` and `xelatex`: [TeX Live](https://tug.org/texlive/) or [MiKTeX](https://miktex.org/). The CV compiles with `lualatex` (pdflatex often fails on modern MiKTeX installs with `fontawesome5` font-expansion errors); the cover letter compiles with `xelatex` because `cover.cls` requires `fontspec`.
 
 ## Quick start
@@ -49,6 +62,8 @@ The framework encodes career guidance best practices, including structured evalu
 gh repo fork MadsLorentzen/ai-job-search --clone
 cd ai-job-search
 ```
+
+> This forks the upstream project. If you are cloning this Copilot-adapted fork instead, point `gh repo fork` at its URL.
 
 ### 2. Install job search tools
 
@@ -64,9 +79,9 @@ For `linkedin-search` the install is optional: it has zero runtime dependencies 
 
 ### 3. Set up your profile
 
-```bash
-claude
-# Then inside Claude Code:
+Open the folder in VS Code, open **Copilot Chat**, switch to **Agent mode**, and run:
+
+```
 /setup
 ```
 
@@ -74,7 +89,7 @@ claude
 
 ### 4. Search for jobs
 
-```bash
+```
 /scrape
 ```
 
@@ -82,13 +97,13 @@ This searches multiple job portals for positions matching your profile, deduplic
 
 ### 5. Apply to a job
 
-```bash
+```
 /apply https://jobindex.dk/job/1234567
 ```
 
 If the URL can't be fetched (some job portals block automated access), you can paste the job description directly instead:
 
-```bash
+```
 /apply <paste the full job description here>
 ```
 
@@ -96,12 +111,12 @@ This runs the full workflow: evaluate fit, draft CV + cover letter, review with 
 
 ## Other commands
 
-`/setup`, `/scrape`, and `/apply` form the core workflow. Four more commands extend it once your profile is in place:
+`/setup`, `/scrape`, and `/apply` form the core workflow. Four more prompt files extend it once your profile is in place:
 
 - **`/expand`** enriches your profile by scanning public sources you've already linked in it (GitHub repos, portfolio site, Kaggle, Google Scholar) and looking up syllabi for named courses and certifications. Discovered competencies are added to your profile with a source tag. Useful right after `/setup` to surface skills that documents alone don't make explicit.
 - **`/upskill`** analyzes the gap between your profile and your tracked job postings (or a single posting via `/upskill <URL>`). Produces a prioritized heatmap of skill gaps and a learning plan with web-searched study resources and time estimates. Useful for career planning between applications.
 - **`/add-template`** registers your own LaTeX CV or cover letter template in place of the stock ones. It captures the template's instructions (compile engine, fonts, style rules, page limit), runs a mandatory test compile, and wires the template into `/apply`. See [LaTeX templates](#latex-templates) below.
-- **`/add-portal`** generates a job-portal search skill for a job board in your market. It investigates the portal (search URL pattern, result structure, access rules), scaffolds the CLI skill from the same structure as the shipped ones, and test-runs a live query before registering. See [Job search tools](#job-search-tools) below.
+- **`/add-portal`** generates a job-portal search tool for a job board in your market. It investigates the portal (search URL pattern, result structure, access rules), scaffolds the CLI tool from the same structure as the shipped ones, and test-runs a live query before registering. See [Job search tools](#job-search-tools) below.
 
 `/reset` is also available, see [Starting over](#starting-over) below.
 
@@ -109,28 +124,30 @@ This runs the full workflow: evaluate fit, draft CV + cover letter, review with 
 
 ```
 ai-job-search/
-├── copilot.md                         # Main candidate profile + workflow rules
-├── .claude/
-│   ├── commands/
-│   │   ├── apply.md                   # /apply workflow (drafter-reviewer)
-│   │   ├── setup.md                   # /setup onboarding (documents folder, CV import, or interview)
-│   │   ├── expand.md                  # /expand competency enrichment from documents and online presence
-│   │   ├── add-template.md            # /add-template register custom LaTeX templates
-│   │   ├── add-portal.md              # /add-portal generate a job-portal search skill for your market
-│   │   └── reset.md                   # /reset wipe profile data or documents folder
-│   ├── skills/
-│   │   ├── job-application-assistant/  # Core application skill
-│   │   │   ├── SKILL.md               # Skill definition
-│   │   │   ├── 01-candidate-profile.md # Your education, experience, skills
-│   │   │   ├── 02-behavioral-profile.md# PI/DISC/personality assessment
-│   │   │   ├── 03-writing-style.md    # Tone, structure, do's and don'ts
-│   │   │   ├── 04-job-evaluation.md   # Scoring framework for job fit
-│   │   │   ├── 05-cv-templates.md     # LaTeX CV structure + tailoring rules
-│   │   │   ├── 06-cover-letter-templates.md # LaTeX cover letter templates
-│   │   │   └── 07-interview-prep.md   # STAR examples + interview framework
-│   │   ├── job-scraper/               # Job search orchestration
-│   │   └── upskill/                   # /upskill skill gap analysis and learning plan
-│   └── settings.json                  # Claude Code permissions (shared, scoped)
+├── copilot.md                         # Copilot custom instructions: candidate profile + workflow rules
+├── .github/
+│   ├── prompts/                       # GitHub Copilot prompt files (the /commands)
+│   │   ├── setup.prompt.md            # /setup onboarding (documents folder, CV import, or interview)
+│   │   ├── scrape.prompt.md           # /scrape job-portal search
+│   │   ├── apply.prompt.md            # /apply workflow (drafter-reviewer)
+│   │   ├── expand.prompt.md           # /expand competency enrichment from documents and online presence
+│   │   ├── upskill.prompt.md          # /upskill skill gap analysis and learning plan
+│   │   ├── add-template.prompt.md     # /add-template register custom LaTeX templates
+│   │   ├── add-portal.prompt.md       # /add-portal generate a job-portal search tool for your market
+│   │   └── reset.prompt.md            # /reset wipe profile data or documents folder
+│   └── FUNDING.yml                    # Sponsor link (upstream author)
+├── skills/                            # Skill/content library referenced by the prompts
+│   ├── job-application-assistant/     # Core application skill
+│   │   ├── SKILL.md                   # Skill definition
+│   │   ├── 01-candidate-profile.md    # Your education, experience, skills
+│   │   ├── 02-behavioral-profile.md   # PI/DISC/personality assessment
+│   │   ├── 03-writing-style.md        # Tone, structure, do's and don'ts
+│   │   ├── 04-job-evaluation.md       # Scoring framework for job fit
+│   │   ├── 05-cv-templates.md         # LaTeX CV structure + tailoring rules
+│   │   ├── 06-cover-letter-templates.md # LaTeX cover letter templates
+│   │   └── 07-interview-prep.md       # STAR examples + interview framework
+│   ├── job-scraper/                   # Job search orchestration
+│   └── upskill/                       # /upskill skill gap analysis and learning plan
 ├── .agents/skills/                    # Job portal CLI tools
 │   ├── jobbank-search/                # Akademikernes Jobbank (Denmark)
 │   ├── jobdanmark-search/             # Jobdanmark.dk (Denmark)
@@ -170,7 +187,7 @@ The `/apply` command runs a **drafter-reviewer workflow** with mandatory PDF com
 3. **Draft** a tailored CV and cover letter in LaTeX
 4. **Spawn a reviewer agent** that researches the company and critiques the drafts
 5. **Revise** based on the reviewer's feedback
-6. **Compile and inspect** both PDFs: lualatex for the CV, xelatex for the cover letter. Claude reads the rendered pages and iterates on the LaTeX until the CV is exactly 2 pages with no orphaned entry titles, and the cover letter is exactly 1 page with the signature visible and fonts consistent.
+6. **Compile and inspect** both PDFs: lualatex for the CV, xelatex for the cover letter. Copilot reads the rendered pages and iterates on the LaTeX until the CV is exactly 2 pages with no orphaned entry titles, and the cover letter is exactly 1 page with the signature visible and fonts consistent.
 7. **Present** the final output with a verification checklist
 
 All claims in the CV and cover letter are verified against your actual profile. The system never fabricates skills or experience.
@@ -179,8 +196,8 @@ All claims in the CV and cover letter are verified against your actual profile. 
 
 - **PDF verification loop.** Most LaTeX-resume templates produce "looks fine in the .tex" output that breaks in the PDF: job titles orphan to the next page, cover letters spill onto page 2, bullet fonts silently fall back to the body font. The `/apply` command compiles and visually inspects every PDF and applies targeted fixes (`\needspace`, `\enlargethispage`, font-matching wrappers for list items) until the layout is clean. This runs automatically on every application.
 - **Relevance-weighted CV cutting.** When a CV overflows 2 pages, the workflow does not cut mechanically from the "oldest" section. It scores each candidate line by (a) relevance to the target posting, (b) uniqueness in the document, and (c) whether the cover letter depends on it, and cuts the lowest-total-score line first. An older-role bullet that hits posting keywords survives ahead of a recent-role bullet that does not.
-- **Drafter-reviewer separation.** The drafter writes; a second Claude agent, spawned with a fresh context, researches the company and critiques the drafts. The drafter then revises. This catches missed keywords, weak framing, and generic language that a single pass often leaves in.
-- **Token-efficient reviewer dispatch.** The reviewer agent receives drafts inline rather than re-reading them, and the verification checklist runs once at the end of the workflow rather than being duplicated by both agents. Note: the new compile-and-inspect step in Step 5 spends some of those savings on PDF rendering and layout iteration — the workflow trades some end-to-end token cost for a real reduction in broken PDFs reaching the user.
+- **Drafter-reviewer separation.** The drafter writes; a second Copilot agent, spawned with a fresh context, researches the company and critiques the drafts. The drafter then revises. This catches missed keywords, weak framing, and generic language that a single pass often leaves in.
+- **Token-efficient reviewer dispatch.** The reviewer agent receives drafts inline rather than re-reading them, and the verification checklist runs once at the end of the workflow rather than being duplicated by both agents. Note: the compile-and-inspect step spends some of those savings on PDF rendering and layout iteration — the workflow trades some end-to-end token cost for a real reduction in broken PDFs reaching the user.
 
 ## Customization
 
@@ -234,9 +251,9 @@ The four Danish CLI tools in `.agents/skills/` (Jobbank, Jobdanmark, Jobindex, J
 /add-portal
 ```
 
-Give it your local job board's URL. The command investigates the portal (search-URL pattern, result-page structure, robots.txt/access rules), scaffolds a CLI skill with the same structure, commands, and output contract as the shipped ones, and test-runs a live query before registering anything. Auth-walled portals are declined, and portals with restrictive terms get a prominent personal-use-only warning in the generated skill. The generated skill is market-specific and lives in your fork; the generator itself is the universal part.
+Give it your local job board's URL. The command investigates the portal (search-URL pattern, result-page structure, robots.txt/access rules), scaffolds a CLI tool with the same structure, commands, and output contract as the shipped ones, and test-runs a live query before registering anything. Auth-walled portals are declined, and portals with restrictive terms get a prominent personal-use-only warning in the generated tool. The generated tool is market-specific and lives in your fork; the generator itself is the universal part.
 
-For a **country-agnostic** starting point, the repo also includes **`linkedin-search`** — a job-search skill built on LinkedIn's public, unauthenticated `jobs-guest` endpoints. It is field-agnostic, has **zero runtime dependencies** (runs with just `bun`), and takes the search location as an explicit flag, so it works for any market out of the box (`-l "Berlin, Germany"`, `-l "Mumbai, Maharashtra, India"`, `-l "Remote"`, …). It is intended for **personal use only** — automated access is against LinkedIn's Terms of Service, so keep volume low. See `.agents/skills/linkedin-search/SKILL.md`.
+For a **country-agnostic** starting point, the repo also includes **`linkedin-search`** — a job-search tool built on LinkedIn's public, unauthenticated `jobs-guest` endpoints. It is field-agnostic, has **zero runtime dependencies** (runs with just `bun`), and takes the search location as an explicit flag, so it works for any market out of the box (`-l "Berlin, Germany"`, `-l "Mumbai, Maharashtra, India"`, `-l "Remote"`, …). It is intended for **personal use only** — automated access is against LinkedIn's Terms of Service, so keep volume low. See `.agents/skills/linkedin-search/SKILL.md`.
 
 ### Salary benchmarking
 
@@ -275,9 +292,10 @@ To get the most from this, invest time during `/setup` in describing not just yo
 
 ## Acknowledgements
 
-- [Mikkel Krogholm](https://github.com/mikkelkrogsholm) ([skills repo](https://github.com/mikkelkrogsholm/skills)) for the job search CLI skills
-- Built with [Claude Code](https://claude.com/claude-code) by [Anthropic](https://anthropic.com)
+- **[Mads Lorentzen](https://github.com/MadsLorentzen)** — creator of the original [ai-job-search](https://github.com/MadsLorentzen/ai-job-search) framework this project is forked from. The entire workflow design, the drafter-reviewer application pipeline, and the Danish job-portal skills originate from his work. [Support him on Ko-fi](https://ko-fi.com/madslorentzen).
+- [Mikkel Krogholm](https://github.com/mikkelkrogsholm) ([skills repo](https://github.com/mikkelkrogsholm/skills)) for the job search CLI skills.
+- Adapted for [GitHub Copilot](https://github.com/features/copilot); originally built with Claude Code by [Anthropic](https://anthropic.com).
 
 ## License
 
-MIT
+MIT — inherited from the [upstream project](https://github.com/MadsLorentzen/ai-job-search). See [LICENSE](LICENSE).

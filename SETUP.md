@@ -4,15 +4,14 @@ Step-by-step instructions for getting the AI Job Search framework running.
 
 ## 1. Prerequisites
 
-### Claude Code
+### GitHub Copilot
 
-Install Claude Code (Anthropic's CLI for Claude):
+Install [Visual Studio Code](https://code.visualstudio.com/) and the GitHub Copilot extensions:
 
-```bash
-npm install -g @anthropic-ai/claude-code
-```
+- [GitHub Copilot](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot)
+- [GitHub Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat)
 
-You'll need an Anthropic API key or a Claude Pro/Team subscription. See the [Claude Code docs](https://docs.anthropic.com/en/docs/claude-code) for details.
+You'll need an active [GitHub Copilot subscription](https://github.com/features/copilot) with **Agent mode** enabled. This framework drives Copilot through custom instructions (`copilot.md`) and prompt files (`.github/prompts/`), which you invoke from Copilot Chat by typing `/`. See the [Copilot prompt-files docs](https://code.visualstudio.com/docs/copilot/copilot-customization) for details.
 
 ### Python
 
@@ -63,22 +62,16 @@ If you're outside Denmark, you can generate an equivalent search skill for your 
 
 ## 4. Run the setup interview
 
-Start Claude Code in the repository:
-
-```bash
-claude
-```
-
-Then run the onboarding:
+Open the repository folder in VS Code, open **Copilot Chat**, and switch to **Agent mode**. Then run the onboarding:
 
 ```
 /setup
 ```
 
-Claude will offer three paths:
+Copilot will offer three paths:
 
-- **Path A (documents folder):** Add your CV, LinkedIn export, diplomas, references, or past applications under `documents/`. Claude reads and cross-references them before proposing profile updates. This is best when you have several source files.
-- **Path B (single CV import):** Share one CV/resume by mentioning the file with `@` or pasting the text. Claude extracts it and asks follow-up questions for anything missing.
+- **Path A (documents folder):** Add your CV, LinkedIn export, diplomas, references, or past applications under `documents/`. Copilot reads and cross-references them before proposing profile updates. This is best when you have several source files.
+- **Path B (single CV import):** Share one CV/resume by attaching the file with `#` or pasting the text. Copilot extracts it and asks follow-up questions for anything missing.
 - **Path C (interview mode):** Answer structured interview questions section by section.
 
 All three paths produce the same result: fully populated profile files.
@@ -135,7 +128,7 @@ Or paste the job description directly:
 /apply [paste job posting text here]
 ```
 
-Claude will:
+Copilot will:
 1. Evaluate the fit against your profile
 2. Ask if you want to proceed
 3. Draft a tailored CV and cover letter
@@ -172,9 +165,5 @@ Make sure Bun is installed and you ran `bun install` in each CLI directory. The 
 ### Fonts not found in cover letter
 The cover letter template expects fonts in `cover_letters/OpenFonts/fonts/`. Make sure this directory exists and contains the Lato and Raleway font files.
 
-### Stale `.claude/settings.local.json` from an older clone
-Shared Claude Code permissions now live in `.claude/settings.json` (scoped to `bun run` and `python salary_lookup.py`). Earlier versions of this repo committed a broader `.claude/settings.local.json` that pre-approved `Bash(curl:*)`, `Bash(python:*)` and `Bash(bun:*)`. If you cloned before that change, git leaves the old file behind in your working copy, and its permissions still apply on top of `settings.json`. Delete it (or trim it to your own personal overrides):
-
-```bash
-rm .claude/settings.local.json
-```
+### Prompt files not showing up in Copilot Chat
+The `/setup`, `/apply`, `/scrape`, and related commands are prompt files under `.github/prompts/`. They are only available in **Copilot Chat Agent mode** with prompt files enabled. If typing `/` doesn't list them, confirm the folder is open in VS Code (not just a single file), that the GitHub Copilot Chat extension is up to date, and that prompt files are enabled in your Copilot settings (`chat.promptFiles`).
