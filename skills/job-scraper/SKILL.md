@@ -1,7 +1,7 @@
 ---
 name: job-scraper
 description: >
-  Scrapes Danish job sites for new positions matching your profile. Deduplicates across runs.
+  Scrapes Indian and international job sites for new positions matching your profile. Deduplicates across runs.
   Triggers on: job scrape, find jobs, search jobs, new jobs, job search, scrape jobs, /scrape
 allowed-tools: Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, Agent, AskUserQuestion
 ---
@@ -12,7 +12,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, Agent, AskUse
 
 ## How It Works
 
-This skill searches multiple Danish job sites using targeted queries based on your profile, deduplicates against previously seen jobs and the application tracker, and presents new matches with a quick fit assessment.
+This skill searches multiple Indian and international job sites using targeted queries based on your profile, deduplicates against previously seen jobs and the application tracker, and presents new matches with a quick fit assessment.
 
 ## Invocation
 
@@ -43,8 +43,9 @@ Run **WebSearch** queries from `search-queries.md`. By default, run the top 3 pr
 If the user specified a focus area (e.g. "data science"), prioritize queries from that category.
 
 For each search:
-- Use `WebSearch` with site-specific queries (jobindex.dk, linkedin.com/jobs, karriere.dk, etc.)
-- Target your configured geographic area
+- Use `WebSearch` with site-specific queries (naukri.com, linkedin.com/jobs, instahyre.com, wellfound.com, indeed.com, etc.)
+- For LinkedIn, you may also use the country-agnostic `linkedin-search` CLI under `.agents/skills/linkedin-search/` (pass `--location` for India, another country, or `Remote`)
+- Target your configured geographic area (Indian cities, a target country, or Remote)
 - Look for postings from the last 14 days
 
 ### Step 2: Fetch & Parse
@@ -117,7 +118,7 @@ If the user decides to apply to any job, add a row to `job_search_tracker.csv`.
 
 1. **Never fabricate job postings.** Only present jobs found via actual WebSearch/WebFetch results.
 2. **Respect deduplication.** Always check seen_jobs.json AND job_search_tracker.csv before presenting.
-3. **Focus on configured geographic area.** Skip jobs that require relocation or are clearly outside commute range.
+3. **Focus on configured geographic area.** Include Indian cities you target, India-based remote, and international remote roles. For on-site international roles, check for visa sponsorship / relocation support before including, and flag those that require work authorization you do not hold.
 4. **Only open positions.** Skip postings with expired deadlines or those marked as closed.
 5. **Be efficient with WebFetch.** Don't fetch every search result - use titles and snippets to pre-filter before fetching.
 6. **Parallel searches.** Use the Agent tool or parallel WebSearch calls to speed up the search phase.

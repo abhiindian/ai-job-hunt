@@ -44,9 +44,11 @@ Confirm what's active with `copilot skill list`. All eight framework skills are
 registered:
 
 **Portal search skills** — auto-discovered as *Project* skills from
-[`.agents/skills/`](.agents/skills/): `jobbank-search`, `jobdanmark-search`,
-`jobindex-search`, `jobnet-search`, `linkedin-search`. Each wraps a Bun-based CLI in
-its `cli/` folder — run `bun install` in each once before first use. They power `scrape`.
+[`.agents/skills/`](.agents/skills/): `linkedin-search` (country-agnostic; covers the
+Indian and international markets). It wraps a Bun-based CLI in its `cli/` folder — run
+`bun install` there once before first use. It powers `scrape`, alongside web search
+across Naukri, Instahyre, Wellfound, Indeed, and remote boards (see
+`skills/job-scraper/search-queries.md`).
 
 **Workflow skills** — the CLI only scans `.github/skills/`, `.agents/skills/`, and
 `.claude/skills/`, so the three under [`skills/`](skills/) are registered as *Custom*

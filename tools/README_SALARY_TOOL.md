@@ -8,7 +8,7 @@ The salary lookup tool (`salary_lookup.py`) lets you benchmark company salaries 
 
 ## How it works
 
-The tool reads a `salary_data.json` file in the repo root containing company salary benchmarks. It uses fuzzy matching to find companies by name, handling Danish/Nordic characters, legal suffixes (A/S, ApS), and common spelling variations.
+The tool reads a `salary_data.json` file in the repo root containing company salary benchmarks. It uses fuzzy matching to find companies by name, handling legal suffixes (Pvt Ltd, Inc, A/S), accented/Nordic characters, and common spelling variations.
 
 The data format supports any index-based or absolute salary data. For example:
 - Index 100 = median salary, higher is better
@@ -88,16 +88,16 @@ Start with an empty template and add companies as you research them:
   "metadata": {
     "source": "Personal research",
     "index_baseline": 0,
-    "index_label": "Monthly salary (DKK)",
-    "baseline_description": "Approximate monthly salary before tax"
+    "index_label": "Annual salary (INR)",
+    "baseline_description": "Approximate annual CTC before tax"
   },
   "companies": [
     {
       "company": "Example Corp",
-      "city": "Copenhagen",
+      "city": "Bengaluru",
       "categories": {
-        "entry_level": { "index": 42000 },
-        "senior": { "index": 55000 }
+        "entry_level": { "index": 1200000 },
+        "senior": { "index": 3500000 }
       }
     }
   ]
@@ -107,9 +107,9 @@ Start with an empty template and add companies as you research them:
 ## Usage
 
 ```bash
-python salary_lookup.py "Novo Nordisk"
-python salary_lookup.py "Ørsted" --city "Fredericia"
-python salary_lookup.py "COWI" --json
+python salary_lookup.py "Infosys"
+python salary_lookup.py "TCS" --city "Bengaluru"
+python salary_lookup.py "Google" --json
 python salary_lookup.py --list-all
 ```
 
@@ -117,4 +117,4 @@ python salary_lookup.py --list-all
 
 - The data file (`salary_data.json`) is **excluded from git** (see `.gitignore`). Your salary data may be proprietary or confidential.
 - If the data file is missing, `salary_lookup.py` exits with a helpful error message and the `/apply` workflow skips the salary benchmark step.
-- The fuzzy matcher handles Danish company name variations: legal suffixes, Nordic characters, anglicized spellings, and partial matches.
+- The fuzzy matcher handles company name variations: legal suffixes (Pvt Ltd, Inc, A/S), accented/Nordic characters, anglicized spellings, and partial matches.

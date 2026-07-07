@@ -17,7 +17,7 @@ An AI-powered job application framework built on [GitHub Copilot](https://github
 
 ## What this is
 
-A structured workflow that turns GitHub Copilot into a full-stack job application assistant. The core workflow (self-profiling, fit evaluation, and the drafter-reviewer application pipeline) is **language- and country-agnostic**. The job portal search tools are built for the Danish market (Jobindex, Jobnet, Akademikernes Jobbank, etc.), but the pattern is designed to be swapped for your local job boards.
+A structured workflow that turns GitHub Copilot into a full-stack job application assistant. The core workflow (self-profiling, fit evaluation, and the drafter-reviewer application pipeline) is **language- and country-agnostic**. The job search targets the **Indian and international markets** (Naukri, Instahyre, Wellfound, Indeed, LinkedIn, and remote boards) via web search, plus the country-agnostic LinkedIn CLI, and the pattern is designed to be swapped for any local job boards.
 
 ```
 /setup          /scrape              /apply <url>
@@ -51,7 +51,7 @@ You interact with everything from Copilot Chat inside VS Code (or the GitHub Cop
 - [Visual Studio Code](https://code.visualstudio.com/) with the [GitHub Copilot](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot) and [GitHub Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) extensions
 - An active [GitHub Copilot subscription](https://github.com/features/copilot) with **Agent mode** enabled
 - Python 3.10+
-- [Bun](https://bun.sh) (for the Danish job-search CLI tools)
+- [Bun](https://bun.sh) (for the LinkedIn job-search CLI tool)
 - LaTeX distribution with `lualatex` and `xelatex`: [TeX Live](https://tug.org/texlive/) or [MiKTeX](https://miktex.org/). The CV compiles with `lualatex` (pdflatex often fails on modern MiKTeX installs with `fontawesome5` font-expansion errors); the cover letter compiles with `xelatex` because `cover.cls` requires `fontspec`.
 
 ## Quick start
@@ -68,10 +68,6 @@ cd ai-job-search
 ### 2. Install job search tools
 
 ```bash
-cd .agents/skills/jobbank-search/cli && bun install && cd ../../../..
-cd .agents/skills/jobdanmark-search/cli && bun install && cd ../../../..
-cd .agents/skills/jobindex-search/cli && bun install && cd ../../../..
-cd .agents/skills/jobnet-search/cli && bun install && cd ../../../..
 cd .agents/skills/linkedin-search/cli && bun install && cd ../../../..
 ```
 
@@ -98,7 +94,7 @@ This searches multiple job portals for positions matching your profile, deduplic
 ### 5. Apply to a job
 
 ```
-/apply https://jobindex.dk/job/1234567
+/apply https://www.linkedin.com/jobs/view/1234567890
 ```
 
 If the URL can't be fetched (some job portals block automated access), you can paste the job description directly instead:
@@ -149,11 +145,7 @@ ai-job-search/
 │   ├── job-scraper/                   # Job search orchestration
 │   └── upskill/                       # /upskill skill gap analysis and learning plan
 ├── .agents/skills/                    # Job portal CLI tools
-│   ├── jobbank-search/                # Akademikernes Jobbank (Denmark)
-│   ├── jobdanmark-search/             # Jobdanmark.dk (Denmark)
-│   ├── jobindex-search/               # Jobindex.dk (Denmark)
-│   ├── jobnet-search/                 # Jobnet.dk (Denmark, government portal)
-│   └── linkedin-search/               # LinkedIn public job listings (country-agnostic)
+│   └── linkedin-search/               # LinkedIn public job listings (country-agnostic; India + international)
 ├── cv/
 │   └── main_example.tex               # moderncv LaTeX template
 ├── cover_letters/
@@ -245,7 +237,7 @@ If you prefer doing it by hand, the manual route still works: update the guidanc
 
 ### Job search tools
 
-The four Danish CLI tools in `.agents/skills/` (Jobbank, Jobdanmark, Jobindex, Jobnet) demonstrate the pattern for building a job-portal integration for a specific market. If you're in a different country, run:
+Job search targets the **Indian and international markets** — the `/scrape` workflow searches Naukri, Instahyre, Wellfound, Indeed, LinkedIn, and remote boards via web search (see `skills/job-scraper/search-queries.md`), and the shipped **`linkedin-search`** CLI covers LinkedIn for any location. To add a dedicated CLI for another specific job board (any country), run:
 
 ```
 /add-portal
