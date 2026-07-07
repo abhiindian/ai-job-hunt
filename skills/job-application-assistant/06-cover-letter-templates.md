@@ -145,9 +145,10 @@ The font wrapper is mandatory — if you just move `\begin{itemize}` outside `\l
 - Ampersand: `\&`
 
 ### Non-English Cover Letters
+- Default to English for Indian and international roles; write in the posting's language only if the posting itself is in another language
 - Same template structure, just write content in the posting's language
 - Adjust date format to local convention
-- Adjust closing to local convention (e.g. "Med venlig hilsen," for Danish)
+- Adjust closing to local convention (e.g. "Sincerely," / "Best regards," in English; "सादर," in Hindi)
 
 ## Checklist Before Finalizing
 - [ ] No em-dashes (use commas or periods instead)

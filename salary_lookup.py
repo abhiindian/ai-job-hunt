@@ -12,7 +12,7 @@ instructions on the expected format and how to convert from Excel.
 
 Usage:
     python salary_lookup.py "Company Name"
-    python salary_lookup.py "Company Name" --city "København"
+    python salary_lookup.py "Company Name" --city "Bengaluru"
     python salary_lookup.py "Company Name" --json
     python salary_lookup.py --list-all
 """
@@ -34,6 +34,11 @@ SPELLING_VARIANTS = {
 
 # Legal suffixes and noise to strip when matching company names
 STRIP_PATTERNS = [
+    # Indian / international legal suffixes
+    r"\bpvt\.?\b", r"\bprivate\b", r"\bltd\.?\b", r"\blimited\b",
+    r"\bllp\b", r"\binc\.?\b", r"\bcorp\.?\b", r"\bcorporation\b",
+    r"\bplc\b", r"\bgmbh\b",
+    # Nordic legal suffixes (retained for international coverage)
     r"\ba/s\b", r"\baps\b", r"\bi/s\b", r"\bp/s\b", r"\bk/s\b",
     r"\bivs\b", r"\bamba\b", r"\ba\.m\.b\.a\.\b",
     r"\(vg\)", r"\(.*?\)",  # (VG) and other parentheticals
