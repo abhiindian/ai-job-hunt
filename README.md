@@ -1,19 +1,34 @@
 <p align="center">
-  <img src="claude_animation.gif" alt="AI Job Search Assistant" width="200">
+  <img src="copilot_logo.png" alt="AI Job Search Assistant — powered by GitHub Copilot" width="200">
 </p>
 
 # AI Job Search
 
-An AI-powered job application framework built on [GitHub Copilot](https://github.com/features/copilot). Fork it, fill in your profile, and let Copilot evaluate job postings, tailor your CV, write cover letters, and prepare you for interviews.
+An AI-powered job application framework built on [GitHub Copilot](https://github.com/features/copilot). Fork it, fill in your profile, and let Copilot evaluate job postings, tailor your CV, write cover letters, and prepare you for interviews — running against GitHub's hosted models **or a local LLM on your own machine** via [Ollama](https://ollama.com) or [LM Studio](https://lmstudio.ai).
 
 > [!NOTE]
-> This project is a fork and adaptation of the excellent **[MadsLorentzen/ai-job-search](https://github.com/MadsLorentzen/ai-job-search)** by [Mads Lorentzen](https://github.com/MadsLorentzen). The original was built for Claude Code; this fork ports the workflow to GitHub Copilot. Full credit for the original design, the drafter-reviewer application pipeline, and the Danish job-portal skills goes to Mads. Please ⭐ the [upstream repository](https://github.com/MadsLorentzen/ai-job-search) and consider supporting his work below.
+> This project is a fork and adaptation of the excellent **[MadsLorentzen/ai-job-search](https://github.com/MadsLorentzen/ai-job-search)** by [Mads Lorentzen](https://github.com/MadsLorentzen). The original was built for Claude Code; this fork ports the workflow to GitHub Copilot and adds a local-LLM path. Full credit for the original design, the drafter-reviewer application pipeline, and the job-portal skills goes to Mads. Please ⭐ the [upstream repository](https://github.com/MadsLorentzen/ai-job-search) and consider supporting his work below.
 
 <p align="center">
   <a href="https://ko-fi.com/madslorentzen">
     <img src="https://storage.ko-fi.com/cdn/kofi3.png?v=6" alt="Buy Mads Lorentzen a coffee at ko-fi.com" height="40">
   </a>
 </p>
+
+## Contents
+
+- [What this is](#what-this-is)
+- [How it works with GitHub Copilot](#how-it-works-with-github-copilot)
+- [Prerequisites](#prerequisites)
+- [Local LLM setup (Ollama & LM Studio)](#local-llm-setup-ollama--lm-studio)
+- [Quick start](#quick-start)
+- [Other commands](#other-commands)
+- [File structure](#file-structure)
+- [How `/apply` works](#how-apply-works)
+- [Customization](#customization)
+- [Tips for better results](#tips-for-better-results)
+- [Acknowledgements](#acknowledgements)
+- [License](#license)
 
 ## What this is
 
@@ -39,20 +54,78 @@ The framework encodes career-guidance best practices, including structured evalu
 
 ## How it works with GitHub Copilot
 
-This repo drives GitHub Copilot through two native mechanisms:
+This repo drives GitHub Copilot through native mechanisms, and works from **both** the VS Code chat UI and the terminal:
 
-- **Custom instructions** — [`copilot.md`](copilot.md) holds your candidate profile and the workflow rules Copilot follows. It acts as the persistent context for every chat in this workspace.
-- **Prompt files** — the `/setup`, `/apply`, `/scrape`, and related commands live in [`.github/prompts/`](.github/prompts/) as `*.prompt.md` files. In **Copilot Chat** (VS Code, Agent mode) you invoke them by typing `/` followed by the file name, e.g. `/setup`.
+- **Custom instructions** — [`copilot.md`](copilot.md) holds your candidate profile and the workflow rules Copilot follows. It acts as the persistent context for every chat in this workspace. [`AGENTS.md`](AGENTS.md) does the same job for the Copilot CLI and other `AGENTS.md`-aware agents.
+- **Prompt files (VS Code)** — the `/setup`, `/apply`, `/scrape`, and related commands live in [`.github/prompts/`](.github/prompts/) as `*.prompt.md` files. In **Copilot Chat** (VS Code, Agent mode) you invoke them by typing `/` followed by the file name, e.g. `/setup`.
+- **Custom agents (CLI)** — the same workflows are registered in [`.github/agents/`](.github/agents/) so the [Copilot CLI](https://github.com/github/copilot-cli) can run them. The CLI does not expose prompt files as slash commands, so launch `copilot`, type `/agent`, and pick the workflow (or pass `--agent <name>`). Each agent reads its authoritative prompt file, so the prompt files stay the single source of truth.
 
 You interact with everything from Copilot Chat inside VS Code (or the GitHub Copilot CLI). There is nothing to deploy — the "app" is the set of prompt files plus your profile.
 
 ## Prerequisites
 
-- [Visual Studio Code](https://code.visualstudio.com/) with the [GitHub Copilot](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot) and [GitHub Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) extensions
-- An active [GitHub Copilot subscription](https://github.com/features/copilot) with **Agent mode** enabled
+- [Visual Studio Code](https://code.visualstudio.com/) (**1.99+**) with the [GitHub Copilot](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot) and [GitHub Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) extensions
+- An active [GitHub Copilot subscription](https://github.com/features/copilot) with **Agent mode** enabled — required even when you run inference on a local model, because the extension itself is the harness that executes the tool calls
 - Python 3.10+
 - [Bun](https://bun.sh) (for the LinkedIn job-search CLI tool)
 - LaTeX distribution with `lualatex` and `xelatex`: [TeX Live](https://tug.org/texlive/) or [MiKTeX](https://miktex.org/). The CV compiles with `lualatex` (pdflatex often fails on modern MiKTeX installs with `fontawesome5` font-expansion errors); the cover letter compiles with `xelatex` because `cover.cls` requires `fontspec`.
+- **Optional — for local inference:** [Ollama](https://ollama.com) *or* [LM Studio](https://lmstudio.ai), plus enough RAM/VRAM to run a tool-calling-capable model (16 GB is a realistic floor; 32 GB+ recommended). See the next section.
+
+## Local LLM setup (Ollama & LM Studio)
+
+You can run this framework entirely against a **local model** — nothing leaves your machine at inference time, and there is no per-token cost. GitHub Copilot Chat's "bring your own model" support lets you register a local provider and pick it from the model dropdown; the framework's prompt files and skills work unchanged.
+
+> [!IMPORTANT]
+> **This workflow is agent-heavy.** `/apply`, `/scrape`, and friends depend on tool calling (file edits, terminal commands, web search, spawning a reviewer agent) and long-context reasoning. Small or non-tool-calling models will stall or produce broken output. Use a **strong, tool-calling-capable** model — e.g. `qwen2.5-coder:14b`/`32b`, `llama3.3:70b`, `qwen2.5:32b`, or a comparable instruct model. Smaller models (7B/8B) can handle `/setup` and light chat but struggle with the full `/apply` PDF-verification loop. Copilot's own hosted models remain the most reliable path for `/apply`; local models are great for the profiling, drafting, and iteration steps.
+
+### Option A — Ollama (native in the Copilot model picker)
+
+Ollama is supported directly by the VS Code Copilot Chat model picker.
+
+1. **Install Ollama** and start it (it runs a local server at `http://localhost:11434`):
+   ```bash
+   # macOS (Homebrew) — or download from https://ollama.com
+   brew install ollama
+   ollama serve
+   ```
+2. **Pull a capable model:**
+   ```bash
+   ollama pull qwen2.5-coder:14b
+   # heavier, better tool use if you have the VRAM:
+   # ollama pull qwen2.5-coder:32b
+   # ollama pull llama3.3:70b
+   ```
+3. **Register it in VS Code:** open the Copilot Chat view, click the **model picker** (the model-name dropdown), choose **Manage Models…**, select **Ollama**, and tick the model(s) you pulled. VS Code auto-detects the local Ollama server.
+4. **Select the model** from the dropdown, switch the chat to **Agent mode**, and run the framework commands (`/setup`, `/apply`, …) exactly as documented below.
+
+If VS Code doesn't find the server, confirm `ollama serve` is running and reachable at `http://localhost:11434` (curl `http://localhost:11434/api/tags`).
+
+### Option B — LM Studio (OpenAI-compatible endpoint)
+
+LM Studio exposes an **OpenAI-compatible** local server, which you register in Copilot as an "OpenAI Compatible" provider.
+
+1. **Install [LM Studio](https://lmstudio.ai)**, open the **Search/Discover** tab, and download a tool-calling instruct model (e.g. *Qwen2.5-Coder-14B-Instruct*, *Llama-3.3-70B-Instruct*). Prefer GGUF builds sized to your hardware.
+2. **Start the server:** go to the **Developer** (**Local Server**) tab, load the model, and click **Start Server**. Note the base URL — it defaults to `http://localhost:1234/v1` — and the exact **model id** shown in the loaded-model list.
+3. **Register it in VS Code:** open the Copilot Chat model picker → **Manage Models…** → **OpenAI Compatible** (BYOK). Enter:
+   - **Base URL:** `http://localhost:1234/v1`
+   - **API key:** any non-empty string (LM Studio ignores it locally, e.g. `lm-studio`)
+   - **Model id:** the id from step 2
+4. **Select the model**, switch to **Agent mode**, and run the framework commands.
+
+You can verify the endpoint independently:
+```bash
+curl http://localhost:1234/v1/models
+```
+
+### Using a local model from the Copilot CLI
+
+The [Copilot CLI](https://github.com/github/copilot-cli) reads model configuration from your Copilot settings/environment. If your CLI version supports a custom or local model endpoint, point it at Ollama (`http://localhost:11434/v1`) or LM Studio (`http://localhost:1234/v1`) — both speak the OpenAI-compatible protocol — then run the workflows via `/agent` as described in [How it works](#how-it-works-with-github-copilot). Support for local endpoints varies by CLI release; if yours can't target a local server yet, use the VS Code path above.
+
+### Practical notes
+
+- **Context window:** `/apply` feeds a job posting, your profile, and LaTeX drafts into one conversation. Run local models with the largest context you can afford (Ollama: set `num_ctx`; LM Studio: raise the context length when loading). A cramped context is the most common cause of truncated CVs.
+- **Privacy:** with a local model, profile and job data stay on your machine for inference. Note that `/scrape`, `/expand`, and `/upskill` still perform **web searches / fetches** through the Copilot extension to gather live job and course data — that traffic is inherent to those features regardless of which model you pick.
+- **Cost & offline use:** local inference is free and works without a Copilot inference quota, but you still need the Copilot extension/subscription for the agent harness and for web-search grounding.
 
 ## Quick start
 
@@ -73,7 +146,11 @@ cd .agents/skills/linkedin-search/cli && bun install && cd ../../../..
 
 For `linkedin-search` the install is optional: it has zero runtime dependencies and runs with plain `bun`; `bun install` only pulls TypeScript dev types.
 
-### 3. Set up your profile
+### 3. (Optional) Point Copilot at a local model
+
+If you want local inference, set up Ollama or LM Studio now — see [Local LLM setup](#local-llm-setup-ollama--lm-studio) — and select the local model in the Copilot Chat model picker before continuing. Otherwise Copilot uses its hosted models by default.
+
+### 4. Set up your profile
 
 Open the folder in VS Code, open **Copilot Chat**, switch to **Agent mode**, and run:
 
@@ -83,7 +160,7 @@ Open the folder in VS Code, open **Copilot Chat**, switch to **Agent mode**, and
 
 `/setup` offers three paths: read your `documents/` folder if you have one populated (CV PDF, LinkedIn export, diplomas, reference letters, past applications), import a single CV pasted in chat, or walk through an interview. It auto-detects what you have and asks. Documents-folder mode is idempotent and safe to re-run as you add more material; see `documents/README.md` for the layout.
 
-### 4. Search for jobs
+### 5. Search for jobs
 
 ```
 /scrape
@@ -91,7 +168,7 @@ Open the folder in VS Code, open **Copilot Chat**, switch to **Agent mode**, and
 
 This searches multiple job portals for positions matching your profile, deduplicates results, and presents them sorted by fit. Pick a match to run `/apply` on it directly.
 
-### 5. Apply to a job
+### 6. Apply to a job
 
 ```
 /apply https://www.linkedin.com/jobs/view/1234567890
@@ -116,13 +193,16 @@ This runs the full workflow: evaluate fit, draft CV + cover letter, review with 
 
 `/reset` is also available, see [Starting over](#starting-over) below.
 
+> In the **Copilot CLI**, invoke any of these via `/agent` (e.g. `--agent apply`) rather than as `/`-slash commands. See [`AGENTS.md`](AGENTS.md).
+
 ## File structure
 
 ```
 ai-job-search/
 ├── copilot.md                         # Copilot custom instructions: candidate profile + workflow rules
+├── AGENTS.md                          # Always-on context for the Copilot CLI and AGENTS.md-aware agents
 ├── .github/
-│   ├── prompts/                       # GitHub Copilot prompt files (the /commands)
+│   ├── prompts/                       # GitHub Copilot prompt files (the /commands, VS Code)
 │   │   ├── setup.prompt.md            # /setup onboarding (documents folder, CV import, or interview)
 │   │   ├── scrape.prompt.md           # /scrape job-portal search
 │   │   ├── apply.prompt.md            # /apply workflow (drafter-reviewer)
@@ -131,6 +211,7 @@ ai-job-search/
 │   │   ├── add-template.prompt.md     # /add-template register custom LaTeX templates
 │   │   ├── add-portal.prompt.md       # /add-portal generate a job-portal search tool for your market
 │   │   └── reset.prompt.md            # /reset wipe profile data or documents folder
+│   ├── agents/                        # Copilot CLI custom agents (one per workflow above)
 │   └── FUNDING.yml                    # Sponsor link (upstream author)
 ├── skills/                            # Skill/content library referenced by the prompts
 │   ├── job-application-assistant/     # Core application skill
@@ -190,6 +271,9 @@ All claims in the CV and cover letter are verified against your actual profile. 
 - **Relevance-weighted CV cutting.** When a CV overflows 2 pages, the workflow does not cut mechanically from the "oldest" section. It scores each candidate line by (a) relevance to the target posting, (b) uniqueness in the document, and (c) whether the cover letter depends on it, and cuts the lowest-total-score line first. An older-role bullet that hits posting keywords survives ahead of a recent-role bullet that does not.
 - **Drafter-reviewer separation.** The drafter writes; a second Copilot agent, spawned with a fresh context, researches the company and critiques the drafts. The drafter then revises. This catches missed keywords, weak framing, and generic language that a single pass often leaves in.
 - **Token-efficient reviewer dispatch.** The reviewer agent receives drafts inline rather than re-reading them, and the verification checklist runs once at the end of the workflow rather than being duplicated by both agents. Note: the compile-and-inspect step spends some of those savings on PDF rendering and layout iteration — the workflow trades some end-to-end token cost for a real reduction in broken PDFs reaching the user.
+
+> [!TIP]
+> Step 6's compile-and-inspect loop is the most demanding part for a **local model** — it requires reading rendered PDF pages and making precise LaTeX edits over several iterations. If a local model gets stuck here, switch the model dropdown to a Copilot hosted model for the `/apply` step, then switch back for profiling and drafting.
 
 ## Customization
 
@@ -273,6 +357,11 @@ The single biggest factor in output quality is how much detail you put into your
 - **Skills in context:** Instead of listing "Python" or "project management," describe how and where you applied them. "Built ML pipelines for customer churn prediction in Python using scikit-learn" gives the system far more to work with than "Python, machine learning."
 - **All onboarding paths work:** Whether you point `/setup` at your `documents/` folder, paste a single CV, or walk through the interview, the principle is the same: richer input produces sharper output.
 
+### Choosing between hosted and local models
+
+- **Hosted Copilot models** — most reliable for the full `/apply` PDF loop and multi-step agent work. Use these when output quality matters most.
+- **Local models (Ollama / LM Studio)** — free, private, and offline-friendly for `/setup`, `/expand`, drafting, and iteration. Give them the largest context window your hardware allows, and prefer a strong tool-calling model. You can switch models per step from the chat dropdown without restarting the workflow.
+
 ### Career path discovery
 
 The framework supports two distinct modes of job searching:
@@ -284,9 +373,9 @@ To get the most from this, invest time during `/setup` in describing not just yo
 
 ## Acknowledgements
 
-- **[Mads Lorentzen](https://github.com/MadsLorentzen)** — creator of the original [ai-job-search](https://github.com/MadsLorentzen/ai-job-search) framework this project is forked from. The entire workflow design, the drafter-reviewer application pipeline, and the Danish job-portal skills originate from his work. [Support him on Ko-fi](https://ko-fi.com/madslorentzen).
+- **[Mads Lorentzen](https://github.com/MadsLorentzen)** — creator of the original [ai-job-search](https://github.com/MadsLorentzen/ai-job-search) framework this project is forked from. The entire workflow design, the drafter-reviewer application pipeline, and the original job-portal skills originate from his work. [Support him on Ko-fi](https://ko-fi.com/madslorentzen).
 - [Mikkel Krogholm](https://github.com/mikkelkrogsholm) ([skills repo](https://github.com/mikkelkrogsholm/skills)) for the job search CLI skills.
-- Adapted for [GitHub Copilot](https://github.com/features/copilot); originally built with Claude Code by [Anthropic](https://anthropic.com).
+- Adapted for [GitHub Copilot](https://github.com/features/copilot) with hosted and local-model (Ollama / LM Studio) support; originally built with Claude Code by [Anthropic](https://anthropic.com).
 
 ## License
 
