@@ -25,7 +25,7 @@ of truth.
 
 | Original command | Copilot CLI agent (`/agent` →) | What it does |
 |---|---|---|
-| `/setup`         | `setup`         | Onboard your professional profile |
+| `/setup`         | `setup` (alias: `profile-setup`) | Onboard your professional profile |
 | `/apply`         | `apply`         | Evaluate fit, then draft + review a tailored CV and cover letter |
 | `/scrape`        | `scrape`        | Search job portals, dedupe, rank by fit |
 | `/upskill`       | `upskill`       | Skill-gap analysis + prioritized learning plan |
@@ -70,3 +70,24 @@ resolve them by path):
   own `documents/`.
 - Confirm before any destructive action (see the `reset` workflow).
 - When a workflow's prompt file and this summary disagree, the prompt file wins.
+
+## Running the agents reliably (troubleshooting)
+
+Each `.github/agents/*.agent.md` is a thin shim: its whole job is to **open the
+matching `.github/prompts/*.prompt.md` file with the file-reading tool** (`view`) and
+then execute it. Two things make that fail in practice:
+
+- **Do not call `read_agent` on a workflow name.** `read_agent` reads the live output
+  of an *already-running background agent*; it cannot open a workflow definition and
+  returns `Agent not found`. A weaker model can mistake the shim's "read … agent"
+  wording for this tool and loop on it (`read_agent("setup")`, `read_agent("upskill")`,
+  …) without ever opening the prompt file. The shims now say this explicitly — if you
+  are the agent, open the `.prompt.md` file with `view` and ignore `read_agent`.
+
+- **Use a capable model, in the foreground.** These are multi-step, *interactive*
+  workflows — `setup`, `apply`, and `reset` stop to ask you questions and wait for your
+  answers. A small local model (e.g. a 3B-active MoE like `qwen3.6-35b-a3b`) often
+  can't follow the single "open this file and run it" instruction and stalls in the
+  `read_agent` loop above. Prefer a stronger model (`copilot --model <capable-model>`),
+  and run the workflow interactively — **not** as a backgrounded task, since a
+  background agent can't answer its own questions to you.
