@@ -213,7 +213,7 @@ ai-job-search/
 │   │   └── reset.prompt.md            # /reset wipe profile data or documents folder
 │   ├── agents/                        # Copilot CLI custom agents (one per workflow above)
 │   └── FUNDING.yml                    # Sponsor link (upstream author)
-├── skills/                            # Skill/content library referenced by the prompts
+├── .agents/skills/                    # All skills — auto-discovered by the Copilot CLI
 │   ├── job-application-assistant/     # Core application skill
 │   │   ├── SKILL.md                   # Skill definition
 │   │   ├── 01-candidate-profile.md    # Your education, experience, skills
@@ -224,8 +224,7 @@ ai-job-search/
 │   │   ├── 06-cover-letter-templates.md # LaTeX cover letter templates
 │   │   └── 07-interview-prep.md       # STAR examples + interview framework
 │   ├── job-scraper/                   # Job search orchestration
-│   └── upskill/                       # /upskill skill gap analysis and learning plan
-├── .agents/skills/                    # Job portal CLI tools
+│   ├── upskill/                       # /upskill skill gap analysis and learning plan
 │   └── linkedin-search/               # LinkedIn public job listings (country-agnostic; India + international)
 ├── cv/
 │   └── main_example.tex               # moderncv LaTeX template
@@ -321,7 +320,7 @@ If you prefer doing it by hand, the manual route still works: update the guidanc
 
 ### Job search tools
 
-Job search targets the **Indian and international markets** — the `/scrape` workflow searches Naukri, Instahyre, Wellfound, Indeed, LinkedIn, and remote boards via web search (see `skills/job-scraper/search-queries.md`), and the shipped **`linkedin-search`** CLI covers LinkedIn for any location. To add a dedicated CLI for another specific job board (any country), run:
+Job search targets the **Indian and international markets** — the `/scrape` workflow searches Naukri, Instahyre, Wellfound, Indeed, LinkedIn, and remote boards via web search (see `.agents/skills/job-scraper/search-queries.md`), and the shipped **`linkedin-search`** CLI covers LinkedIn for any location. To add a dedicated CLI for another specific job board (any country), run:
 
 ```
 /add-portal

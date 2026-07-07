@@ -12,16 +12,21 @@ single source of truth for who the candidate is and how documents must be produc
 
 ## Commands → custom agents
 
-The framework's workflows were originally authored as VS Code Copilot Chat prompt
-files in [`.github/prompts/`](.github/prompts/). **The Copilot CLI does not expose
-prompt files as `/`-slash commands** (see github/copilot-cli#618, #1113). Instead,
-each workflow is registered as a **custom agent** in
-[`.github/agents/`](.github/agents/), which the CLI *does* support.
+**The Copilot CLI does not expose prompt files as `/`-slash commands** (see
+github/copilot-cli#618, #1113). Instead, each workflow is registered as a **custom
+agent** in [`.github/agents/`](.github/agents/), which the CLI *does* support.
+
+Each `.github/agents/*.agent.md` is now **fully self-contained** — the complete
+workflow lives directly in the agent file, which is the single source of truth. The
+matching `.github/prompts/*.prompt.md` is a thin pointer back to the agent file, kept
+only so VS Code Copilot Chat still resolves the `/`-command. (This is deliberately the
+opposite of the old layout, where the agent was a shim that told the model to go
+"read" the prompt file — a two-hop instruction that weak local models mangled into a
+`read_agent` loop.)
 
 **To run a workflow in the terminal:** launch `copilot`, then type `/agent` and pick
-the workflow from the list (or pass `--agent <name>`). Each agent simply reads and
-executes its authoritative prompt file, so the prompt files remain the single source
-of truth.
+the workflow from the list (or pass `--agent <name>`). The agent executes its own body
+directly — there is no second file to open first.
 
 | Original command | Copilot CLI agent (`/agent` →) | What it does |
 |---|---|---|
@@ -39,55 +44,54 @@ Anything typed when selecting an agent is passed through as that workflow's
 
 ## Skills
 
-The Copilot CLI **auto-discovers and triggers** skills (`SKILL.md` capability packs).
-Confirm what's active with `copilot skill list`. All eight framework skills are
-registered:
+The Copilot CLI **auto-discovers and triggers** skills (`SKILL.md` capability packs)
+from the directories it scans — `.github/skills/`, `.agents/skills/`, and
+`.claude/skills/`. **All framework skills now live under
+[`.agents/skills/`](.agents/skills/)**, so they are picked up automatically with no
+`copilot skill add` step. Confirm what's active with `copilot skill list`.
 
-**Portal search skills** — auto-discovered as *Project* skills from
-[`.agents/skills/`](.agents/skills/): `linkedin-search` (country-agnostic; covers the
-Indian and international markets). It wraps a Bun-based CLI in its `cli/` folder — run
-`bun install` there once before first use. It powers `scrape`, alongside web search
-across Naukri, Instahyre, Wellfound, Indeed, and remote boards (see
-`skills/job-scraper/search-queries.md`).
+**Portal search skills** — `linkedin-search` (country-agnostic; covers the Indian and
+international markets). It wraps a Bun-based CLI in its `cli/` folder — run `bun install`
+there once before first use. It powers `scrape`, alongside web search across Naukri,
+Instahyre, Wellfound, Indeed, and remote boards (see
+`.agents/skills/job-scraper/search-queries.md`).
 
-**Workflow skills** — the CLI only scans `.github/skills/`, `.agents/skills/`, and
-`.claude/skills/`, so the three under [`skills/`](skills/) are registered as *Custom*
-skills via `copilot skill add` (kept in place so the prompt files and VS Code still
-resolve them by path):
+**Workflow skills:**
 
-- [`skills/job-application-assistant/`](skills/job-application-assistant/SKILL.md) —
+- [`.agents/skills/job-application-assistant/`](.agents/skills/job-application-assistant/SKILL.md) —
   evaluating postings, tailoring CVs, cover letters, interview prep. Used by `apply`.
-- [`skills/job-scraper/`](skills/job-scraper/SKILL.md) — scraping/deduping job
+- [`.agents/skills/job-scraper/`](.agents/skills/job-scraper/SKILL.md) — scraping/deduping job
   listings. Used by `scrape`.
-- [`skills/upskill/`](skills/upskill/SKILL.md) — skill-gap analysis. Used by `upskill`.
+- [`.agents/skills/upskill/`](.agents/skills/upskill/SKILL.md) — skill-gap analysis. Used by `upskill`.
 
-> Re-register the Custom skills on a fresh machine with:
-> `copilot skill add skills/job-application-assistant && copilot skill add skills/job-scraper && copilot skill add skills/upskill`
+> These are auto-discovered because they sit in a scanned directory (`.agents/skills/`).
+> Do **not** move them back to a top-level `skills/` folder — the CLI does not scan there,
+> which was the original cause of skills silently never triggering.
 
 ## Golden rules
 
-- Never invent profile facts. Pull only from `copilot.md`, `skills/`, and the user's
-  own `documents/`.
+- Never invent profile facts. Pull only from `copilot.md`, `.agents/skills/`, and the
+  user's own `documents/`.
 - Confirm before any destructive action (see the `reset` workflow).
-- When a workflow's prompt file and this summary disagree, the prompt file wins.
+- When a workflow's agent file and this summary disagree, the agent file wins.
 
 ## Running the agents reliably (troubleshooting)
 
-Each `.github/agents/*.agent.md` is a thin shim: its whole job is to **open the
-matching `.github/prompts/*.prompt.md` file with the file-reading tool** (`view`) and
-then execute it. Two things make that fail in practice:
+Each `.github/agents/*.agent.md` is **self-contained**: the whole workflow is in the
+agent body, so running it means just executing what you already have — there is no
+second file to open first.
 
-- **Do not call `read_agent` on a workflow name.** `read_agent` reads the live output
-  of an *already-running background agent*; it cannot open a workflow definition and
-  returns `Agent not found`. A weaker model can mistake the shim's "read … agent"
-  wording for this tool and loop on it (`read_agent("setup")`, `read_agent("upskill")`,
-  …) without ever opening the prompt file. The shims now say this explicitly — if you
-  are the agent, open the `.prompt.md` file with `view` and ignore `read_agent`.
+- **Never call `read_agent`.** `read_agent` reads the live output of an
+  *already-running background agent*; called on a workflow name it returns
+  `Agent not found` and a weaker model can loop on it forever. There is nothing to
+  "read" — the workflow is the text in front of you. Just do the steps. (The earlier
+  failure mode was an agent shim that told the model to go *read* the prompt file;
+  that indirection is gone.)
 
 - **Use a capable model, in the foreground.** These are multi-step, *interactive*
   workflows — `setup`, `apply`, and `reset` stop to ask you questions and wait for your
-  answers. A small local model (e.g. a 3B-active MoE like `qwen3.6-35b-a3b`) often
-  can't follow the single "open this file and run it" instruction and stalls in the
-  `read_agent` loop above. Prefer a stronger model (`copilot --model <capable-model>`),
-  and run the workflow interactively — **not** as a backgrounded task, since a
-  background agent can't answer its own questions to you.
+  answers. A small local model (e.g. a 3B-active MoE like `qwen3.6-35b-a3b`) may still
+  struggle with a long multi-step workflow even without the indirection. Prefer a
+  stronger model (`copilot --model <capable-model>`), and run the workflow
+  interactively — **not** as a backgrounded task, since a background agent can't answer
+  its own questions to you.

@@ -56,7 +56,7 @@ cd .agents/skills/linkedin-search/cli && bun install && cd ../../../..
 
 For `linkedin-search` the install is optional: it has zero runtime dependencies and runs with plain `bun`; `bun install` only pulls TypeScript dev types.
 
-The `/scrape` workflow targets the **Indian and international markets** — Naukri, Instahyre, Wellfound, Indeed, LinkedIn, and remote boards — via web search (see `skills/job-scraper/search-queries.md`). To add a dedicated CLI for another specific job board, run `/add-portal` — it scaffolds the same CLI structure for any public portal and test-runs a live query before registering. See the "Job search tools" section in the README.
+The `/scrape` workflow targets the **Indian and international markets** — Naukri, Instahyre, Wellfound, Indeed, LinkedIn, and remote boards — via web search (see `.agents/skills/job-scraper/search-queries.md`). To add a dedicated CLI for another specific job board, run `/add-portal` — it scaffolds the same CLI structure for any public portal and test-runs a live query before registering. See the "Job search tools" section in the README.
 
 ## 4. Run the setup interview
 

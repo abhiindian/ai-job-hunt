@@ -79,8 +79,7 @@ This repo is a job application workspace. GitHub Copilot acts as a career adviso
 ## Repo Structure
 - `cv/` - LaTeX CV variants (moderncv template, banking style)
 - `cover_letters/` - LaTeX cover letters (custom cover.cls template)
-- `skills/` - AI skill definitions for the application workflow
-- `.agents/skills/` - Job search CLI tools
+- `.agents/skills/` - AI skill definitions (job-application-assistant, job-scraper, upskill) and portal search CLI tools (linkedin-search); auto-discovered by the Copilot CLI
 
 ## Workflow for New Job Applications
 1. User provides a job posting (URL or text)
